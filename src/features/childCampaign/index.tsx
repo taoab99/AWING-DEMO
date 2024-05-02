@@ -57,20 +57,31 @@ const ChildrenCampaign = ({
     setSubCampaign(newSub);
     onChangeSubItem(indexActive, undefined, newSub);
   };
-  const handleDeleteAds = (index: number) => {
+  const handleDeleteAds = (data: number[]) => {
     const newSub = { ...subCampaign };
-    newSub.ads.splice(index, 1);
+    const newAds = newSub.ads.filter((item, index) => !data.includes(index));
+    newSub.ads = newAds;
     setSubCampaign(newSub);
     onChangeSubItem(indexActive, undefined, newSub);
+  };
+  const handleAdd = () => {
+    setIndexActive(indexActive + 1);
+    onAddSubCampaign();
+    setSubCampaign({
+      name: `Chiến dịch con ${subCampaignsData.length + 1}`,
+      status: true,
+      ads: [
+        {
+          name: "Quảng cáo 1",
+          quantity: 0,
+        },
+      ],
+    });
   };
   return (
     <Box className="pd-2">
       <div className="childCam-box">
-        <Button
-          variant="outlined"
-          className="btn-add"
-          onClick={onAddSubCampaign}
-        >
+        <Button variant="outlined" className="btn-add" onClick={handleAdd}>
           <AddIcon />
         </Button>
         <div className="list-card">
@@ -99,7 +110,9 @@ const ChildrenCampaign = ({
                 <TextField
                   style={{ margin: "1rem 0" }}
                   fullWidth
-                  error={isSubmit ? (subCampaign.name ? false : true) : false}
+                  error={
+                    isSubmit ? (subCampaign.name.trim() ? false : true) : false
+                  }
                   value={subCampaign.name}
                   helperText={
                     isSubmit

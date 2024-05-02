@@ -5,6 +5,7 @@ import { useState } from "react";
 import CampaignTab from "../components/CampaignTab";
 import CampaignInfomation from "./CampaignInfomation";
 import ChildrenCampaign from "./childCampaign";
+import NotificatioModal from "../components/NotificatioModal";
 
 export type informationType = {
   name: string;
@@ -29,6 +30,8 @@ export type campaignType = {
 export default function RootFeature() {
   const [value, setValue] = useState<string>("1");
   const [isSubmit, setSubmit] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+
   const [data, setData] = useState<campaignType>({
     campaign: {
       information: {
@@ -106,10 +109,26 @@ export default function RootFeature() {
       },
     });
   };
-
-  const handleSubmit = () => {
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
     setSubmit(true);
+    setOpen(false);
   };
+  const validateNameChild = data.campaign.subCampaigns.some(
+    (item) => item.name.trim() == ""
+  );
+  const validateAds = data.campaign.subCampaigns.some((item) => {
+    return (
+      item.ads.some((itemAds) => {
+        return itemAds.name.trim() == "" || itemAds.quantity <= 0;
+      }) || item.ads.length === 0
+    );
+  });
+  const validate =
+    data.campaign.information.name.trim() != "" &&
+    !validateNameChild &&
+    !validateAds;
+
   return (
     <div>
       <Container
@@ -121,7 +140,7 @@ export default function RootFeature() {
         }}
         maxWidth={false}
       >
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" color="primary" onClick={handleOpen}>
           SUBMIT
         </Button>
       </Container>
@@ -157,6 +176,11 @@ export default function RootFeature() {
           )}
         </Box>
       </Container>
+      <NotificatioModal
+        isSuccess={validate}
+        onClose={handleClose}
+        open={open}
+      />
     </div>
   );
 }

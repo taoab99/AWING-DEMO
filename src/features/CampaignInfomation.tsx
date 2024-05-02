@@ -1,6 +1,6 @@
 import { TextField } from "@mui/material";
 import Box from "@mui/material/Box";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from "react";
 type Props = {
   isSubmit: boolean;
   campaignData: {
@@ -14,14 +14,6 @@ const CampaignInfomation = ({
   campaignData,
   onChangeData,
 }: Props) => {
-  const [inforCampaign, setInforCampaign] = useState<{
-    name: string;
-    description: string;
-  }>({
-    name: "",
-    description: "ad",
-  });
-
   const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
     const name = e.target.name;
     const value = e.target.value;
@@ -32,7 +24,7 @@ const CampaignInfomation = ({
       <TextField
         fullWidth
         style={{ margin: "1rem 0" }}
-        error={isSubmit ? (campaignData.name ? false : true) : false}
+        error={isSubmit ? (campaignData.name.trim() ? false : true) : false}
         name="name"
         value={campaignData.name}
         helperText={
@@ -49,7 +41,6 @@ const CampaignInfomation = ({
       <TextField
         style={{ margin: "1rem 0" }}
         fullWidth
-        error={inforCampaign.description ? false : true}
         name="describe"
         value={campaignData.describe}
         label="Mô tả"

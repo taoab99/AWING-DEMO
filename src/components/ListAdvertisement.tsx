@@ -7,7 +7,7 @@ import { adsType } from "../features";
 type Props = {
   isSubmit: boolean;
   listData: adsType[];
-  onDeleteAdsItem: (index: number) => void;
+  onDeleteAdsItem: (data: number[]) => void;
   onChangeSub: (
     index?: number,
     data?: { name: string; value: string | number }
@@ -20,7 +20,7 @@ const ListAdvertisement = ({
   onChangeSub,
   onDeleteAdsItem,
 }: Props) => {
-  const [checkAll, setCheckAll] = useState<boolean>(false);
+  const [listIndexChecked, setListIdChecked] = useState<number[]>([]);
   const handleChangeInput = (
     e: ChangeEvent<HTMLInputElement>,
     index: number
@@ -28,11 +28,31 @@ const ListAdvertisement = ({
     const type = e.target.type;
     const name = e.target.name;
     const value = e.target.value;
-    onChangeSub(index, { name, value: type === "text" ? value : +value });
+    onChangeSub(index, {
+      name,
+      value: type === "text" ? value : +value,
+    });
+  };
+  const handleSelectIndex = (
+    e: ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (listIndexChecked.includes(index)) {
+      return setListIdChecked((prevState) => {
+        const newState = prevState.filter((item) => item != index);
+        return newState;
+      });
+    }
+    setListIdChecked([...listIndexChecked, index]);
   };
   const handleCheckAll = (e: ChangeEvent<HTMLInputElement>) => {
-    setCheckAll(!checkAll);
+    if (listIndexChecked.length === listData.length) {
+      return setListIdChecked([]);
+    }
+    const listIndex = listData.map((item, index) => index.valueOf());
+    setListIdChecked(listIndex);
   };
+
   return (
     <Box>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -42,14 +62,32 @@ const ListAdvertisement = ({
               aria-label="CheckAll"
               color="success"
               style={{ padding: "0" }}
-              checked={checkAll}
+              checked={
+                listIndexChecked.length > 0 &&
+                listIndexChecked.length === listData.length
+              }
               onChange={handleCheckAll}
             />
           </div>
           <div className="flex-box-item-big">
-            {!checkAll && "Tên quảng cáo *"}
+            {listIndexChecked.length <= 0 ? (
+              "Tên quảng cáo *"
+            ) : (
+              <IconButton
+                aria-label="delete"
+                style={{ padding: "0" }}
+                onClick={() => {
+                  onDeleteAdsItem(listIndexChecked);
+                  setListIdChecked([]);
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
           </div>
-          <div className="flex-box-item-big"> {!checkAll && "Số lượng *"}</div>
+          <div className="flex-box-item-big">
+            {listIndexChecked.length <= 0 && "Số lượng *"}
+          </div>
           <div className="flex-box-item-small">
             <Button variant="outlined" onClick={() => onChangeSub()}>
               <AddIcon /> THÊM
@@ -67,12 +105,14 @@ const ListAdvertisement = ({
                     aria-label="CheckAll"
                     color="success"
                     style={{ padding: "0" }}
+                    checked={listIndexChecked.includes(index)}
+                    onChange={(e) => handleSelectIndex(e, index)}
                   />
                 </div>
                 <div className="flex-box-item-big">
                   <TextField
                     fullWidth
-                    error={isSubmit ? (item.name ? false : true) : false}
+                    error={isSubmit ? (item.name.trim() ? false : true) : false}
                     value={item.name}
                     name="name"
                     label={`Tên quảng cáo ${index + 1}`}
@@ -96,7 +136,8 @@ const ListAdvertisement = ({
                   <IconButton
                     aria-label="delete"
                     style={{ padding: "0" }}
-                    onClick={() => onDeleteAdsItem(index)}
+                    onClick={() => onDeleteAdsItem([index])}
+                    disabled={listIndexChecked.length > 0}
                   >
                     <DeleteIcon />
                   </IconButton>
